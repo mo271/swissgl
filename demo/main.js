@@ -45,6 +45,9 @@ class DemoApp {
             this.prevPos = [e.offsetX, e.offsetY];
         });
         this.canvas.addEventListener('pointermove', e=>{
+            // prevent rotation while zooming
+            if (e.buttons != 1) return;
+            if (e.touches && e.touches.length === 2) return;
             if (!e.isPrimary || e.buttons != 1) return;
             const [px, py] = this.prevPos;
             const [x, y] = [e.offsetX, e.offsetY];
@@ -54,13 +57,6 @@ class DemoApp {
             yaw -= (x-px)*0.01;
             pitch -= (y-py)*0.01;
             pitch = Math.min(Math.max(pitch, 0), Math.PI);
-            this.viewParams.cameraYPD.set([yaw, pitch, dist]);
-        });
-
-        this.canvas.addEventListener('wheel', e=>{
-            let [yaw, pitch, dist] = this.viewParams.cameraYPD;
-            dist -= e.deltaY*0.001;
-            dist = Math.min(Math.max(dist, 0.01), 20);
             this.viewParams.cameraYPD.set([yaw, pitch, dist]);
         });
 
