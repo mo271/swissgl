@@ -69,7 +69,7 @@ class DemoApp {
                 if (lastTouchDistance !== null) {
                     let [yaw, pitch, dist] = this.viewParams.cameraYPD;
                     dist += (lastTouchDistance - touchDistance)*.05;
-                    dist = Math.min(Math.max(dist, 0.004), 0.1);
+                    dist = Math.min(Math.max(dist, 0.01), 20);
                     this.viewParams.cameraYPD.set([yaw, pitch, dist]);
                 }
                 lastTouchDistance = touchDistance;
