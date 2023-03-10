@@ -46,7 +46,7 @@ class DemoApp {
         });
         this.canvas.addEventListener('pointermove', e=>{
             // prevent rotation while zooming
-            if (e.touches && e.touches.length == 2) return;
+            if (e.touches && e.touches.length != 1) return;
             if (!e.isPrimary || e.buttons != 1) return;
             const [px, py] = this.prevPos;
             const [x, y] = [e.offsetX, e.offsetY];
