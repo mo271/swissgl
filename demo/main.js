@@ -44,24 +44,11 @@ class DemoApp {
             if (!e.isPrimary) return;
             this.prevPos = [e.offsetX, e.offsetY];
         });
-        this.canvas.addEventListener('pointermove', e=>{
-            // prevent rotation while zooming
-            if (e.touches && e.touches.length != 1) return;
-            if (!e.isPrimary || e.buttons != 1) return;
-            const [px, py] = this.prevPos;
-            const [x, y] = [e.offsetX, e.offsetY];
-            this.prevPos = [x, y];
-
-            let [yaw, pitch, dist] = this.viewParams.cameraYPD;
-            yaw -= (x-px)*0.01;
-            pitch -= (y-py)*0.01;
-            pitch = Math.min(Math.max(pitch, 0), Math.PI);
-            this.viewParams.cameraYPD.set([yaw, pitch, dist]);
-        });
 
         let lastTouchDistance = null;
-        this.canvas.addEventListener('touchmove', e => {
-            if (e.touches.length == 2) {
+        this.canvas.addEventListener('pointermove', e=>{
+            // prevent rotation while zooming
+            if (e.touches && e.touches.length == 2) {
                 let touchDistance = Math.hypot(
                     e.touches[0].pageX - e.touches[1].pageX,
                     e.touches[0].pageY - e.touches[1].pageY
@@ -76,6 +63,17 @@ class DemoApp {
             } else {
                 lastTouchDistance = null;
             }
+            if (e.touches && e.touches.length != 1) return;
+            if (!e.isPrimary || e.buttons != 1) return;
+            const [px, py] = this.prevPos;
+            const [x, y] = [e.offsetX, e.offsetY];
+            this.prevPos = [x, y];
+
+            let [yaw, pitch, dist] = this.viewParams.cameraYPD;
+            yaw -= (x-px)*0.01;
+            pitch -= (y-py)*0.01;
+            pitch = Math.min(Math.max(pitch, 0), Math.PI);
+            this.viewParams.cameraYPD.set([yaw, pitch, dist]);
         });
 
         let name = location.hash.slice(1);
