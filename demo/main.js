@@ -79,11 +79,6 @@ class DemoApp {
             }
         });
 
-        this.canvas.addEventListener('touchend', e => {
-            touchDistance = null;
-        });
-
-
         let name = location.hash.slice(1);
         if (!(name in this.demos)) {
             name = 'NeuralCA';
