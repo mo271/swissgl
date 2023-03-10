@@ -46,7 +46,6 @@ class DemoApp {
         });
         this.canvas.addEventListener('pointermove', e=>{
             // prevent rotation while zooming
-            //if (e.buttons != 1) return;
             if (e.touches && e.touches.length === 2) return;
             if (!e.isPrimary || e.buttons != 1) return;
             const [px, py] = this.prevPos;
@@ -71,7 +70,7 @@ class DemoApp {
                 );
                 if (lastTouchDistance !== null) {
                     let [yaw, pitch, dist] = this.viewParams.cameraYPD;
-                    dist *= lastTouchDistance / touchDistance;
+                    dist += lastTouchDistance - touchDistance;
                     dist = Math.min(Math.max(dist, 0.01), 20);
                     this.viewParams.cameraYPD.set([yaw, pitch, dist]);
                 }
