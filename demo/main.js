@@ -64,6 +64,32 @@ class DemoApp {
             this.viewParams.cameraYPD.set([yaw, pitch, dist]);
         });
 
+        let touchDistance = null;
+
+        let lastTouchDistance = null;
+        this.canvas.addEventListener('touchmove', e => {
+            if (e.touches.length == 2) {
+                let touchDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                if (lastTouchDistance !== null) {
+                    let [yaw, pitch, dist] = this.viewParams.cameraYPD;
+                    dist *= lastTouchDistance / touchDistance;
+                    dist = Math.min(Math.max(dist, 0.01), 20);
+                    this.viewParams.cameraYPD.set([yaw, pitch, dist]);
+                }
+                lastTouchDistance = touchDistance;
+            } else {
+                lastTouchDistance = null;
+            }
+        });
+
+        this.canvas.addEventListener('touchend', e => {
+            touchDistance = null;
+        });
+
+
         let name = location.hash.slice(1);
         if (!(name in this.demos)) {
             name = 'NeuralCA';
