@@ -59,7 +59,6 @@ class DemoApp {
             this.viewParams.cameraYPD.set([yaw, pitch, dist]);
         });
 
-        let touchDistance = null;
         let lastTouchDistance = null;
         this.canvas.addEventListener('touchmove', e => {
             if (e.touches.length == 2) {
@@ -70,7 +69,7 @@ class DemoApp {
                 if (lastTouchDistance !== null) {
                     let [yaw, pitch, dist] = this.viewParams.cameraYPD;
                     dist += (lastTouchDistance - touchDistance)*.05;
-                    dist = Math.min(Math.max(dist, 0.01), 20);
+                    dist = Math.min(Math.max(dist, 0.002), 200);
                     this.viewParams.cameraYPD.set([yaw, pitch, dist]);
                 }
                 lastTouchDistance = touchDistance;
