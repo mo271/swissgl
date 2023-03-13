@@ -38,32 +38,16 @@ class DemoApp {
                 return view2proj(wld2view(p));
             }
         `;
-
         this.prevPos = [0,0];
         this.canvas.addEventListener('pointerdown', e=>{
             if (!e.isPrimary) return;
             this.prevPos = [e.offsetX, e.offsetY];
-        });
-
-        let lastTouchDistance = null;
-        this.canvas.addEventListener('pointermove', e=>{
-            // prevent rotation while zooming
-            if (e.touches && e.touches.length == 2) {
-                let touchDistance = Math.hypot(
-                    e.touches[0].pageX - e.touches[1].pageX,
-                    e.touches[0].pageY - e.touches[1].pageY
-                );
-                if (lastTouchDistance !== null) {
-                    let [yaw, pitch, dist] = this.viewParams.cameraYPD;
-                    dist += (lastTouchDistance - touchDistance)*.05;
-                    dist = Math.min(Math.max(dist, 0.01), 20);
-                    this.viewParams.cameraYPD.set([yaw, pitch, dist]);
-                }
-                lastTouchDistance = touchDistance;
-            } else {
-                lastTouchDistance = null;
+            this.isTouchPad = e.pointerType === "touch";
+            if (this.isTouchPad) {
+                this.initialDistance = null;
             }
-            if (e.touches && e.touches.length != 1) return;
+        });
+        this.canvas.addEventListener('pointermove', e=>{
             if (!e.isPrimary || e.buttons != 1) return;
             const [px, py] = this.prevPos;
             const [x, y] = [e.offsetX, e.offsetY];
@@ -73,6 +57,29 @@ class DemoApp {
             yaw -= (x-px)*0.01;
             pitch -= (y-py)*0.01;
             pitch = Math.min(Math.max(pitch, 0), Math.PI);
+            this.viewParams.cameraYPD.set([yaw, pitch, dist]);
+
+            if (this.isTouchPad && e.touches.length === 2) {
+                const [x1, y1] = [e.touches[0].clientX, e.touches[0].clientY];
+                const [x2, y2] = [e.touches[1].clientX, e.touches[1].clientY];
+                const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+                if (this.initialDistance === null) {
+                    this.initialDistance = distance;
+                } else {
+                    const zoomFactor = distance / this.initialDistance;
+                    let [yaw, pitch, dist] = this.viewParams.cameraYPD;
+                    dist /= zoomFactor;
+                    dist = Math.min(Math.max(dist, 0.01), 20);
+                    this.viewParams.cameraYPD.set([yaw, pitch, dist]);
+                }
+            }
+        });
+
+        this.canvas.addEventListener('wheel', e=>{
+            if (this.isTouchPad) return;
+            let [yaw, pitch, dist] = this.viewParams.cameraYPD;
+            dist -= e.deltaY*0.001;
+            dist = Math.min(Math.max(dist, 0.01), 20);
             this.viewParams.cameraYPD.set([yaw, pitch, dist]);
         });
 
