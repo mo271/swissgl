@@ -39,6 +39,62 @@ class DemoApp {
             }
         `;
         this.prevPos = [0,0];
+        // Define a helper function to get the position of the first touch in a touch event
+        function getTouchPos(e) {
+        const touch = e.touches[0];
+        return [touch.clientX, touch.clientY];
+        }
+
+        // Add touch event listeners to the canvas
+        this.canvas.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) {
+            // Handle single finger touch
+            const pos = getTouchPos(e);
+            this.prevPos = pos;
+        } else if (e.touches.length === 2) {
+            // Handle two finger touch for pinch zoom
+            const pos1 = getTouchPos(e);
+            const pos2 = getTouchPos(e.touches[1]);
+            const dist = Math.hypot(pos2[0] - pos1[0], pos2[1] - pos1[1]);
+            this.touchStartDist = dist;
+            this.touchStartZoom = this.viewParams.cameraYPD[2];
+        }
+        });
+
+        this.canvas.addEventListener('touchmove', e => {
+        e.preventDefault(); // prevent scrolling while touching canvas
+        if (e.touches.length === 1) {
+            // Handle single finger touch
+            const pos = getTouchPos(e);
+            const [px, py] = this.prevPos;
+            const [x, y] = pos;
+            this.prevPos = pos;
+
+            let [yaw, pitch, dist] = this.viewParams.cameraYPD;
+            yaw -= (x-px)*0.01;
+            pitch -= (y-py)*0.01;
+            pitch = Math.min(Math.max(pitch, 0), Math.PI);
+            this.viewParams.cameraYPD.set([yaw, pitch, dist]);
+        } else if (e.touches.length === 2) {
+            // Handle two finger touch for pinch zoom
+            const pos1 = getTouchPos(e);
+            const pos2 = getTouchPos(e.touches[1]);
+            const dist = Math.hypot(pos2[0] - pos1[0], pos2[1] - pos1[1]);
+            let zoom = this.touchStartZoom - (dist - this.touchStartDist) * 0.01;
+            zoom = Math.min(Math.max(zoom, 0.01), 20);
+            this.viewParams.cameraYPD[2] = zoom;
+        }
+        });
+
+        this.canvas.addEventListener('touchend', e => {
+        if (e.touches.length === 0) {
+            // Handle end of touch event
+            this.touchStartDist = null;
+            this.touchStartZoom = null;
+        }
+        });
+
+
         this.canvas.addEventListener('pointerdown', e=>{
             if (!e.isPrimary) return;
             this.prevPos = [e.offsetX, e.offsetY];
