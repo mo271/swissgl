@@ -1,0 +1,59 @@
+<script src="swissgl.js"></script>
+<canvas id="c" width="1200" height="400"></canvas>
+<script>
+    const canvas = document.getElementById('c');
+    const glsl = SwissGL(canvas);
+    this.viewParams = {
+            cameraXYD: new Float32Array(3),
+    };
+    this.viewParams.cameraXYD.set([2.0, 3.0, 4.0]);
+    this.glsl_include = `
+            uniform vec3 cameraXYD;
+            vec4 cameraPos() {
+                vec4 p = vec4(cameraXYD.x, cameraXYD.y, cameraXYD.z, 1.0);
+                return p;
+            }
+            vec4 wld2proj(vec4 p) {
+                return p - cameraPos();
+            }
+        `;
+    function render(t) {
+        t /= 1000; // ms to sec
+        glsl({t},this.glsl_include + `
+            void fragment() {
+              out0 = wld2proj(vec4(UV.x, UV.y, .5, .9));
+            }
+        `);
+        requestAnimationFrame(render);
+    }
+
+    this.prevPos = [0,0];
+    canvas.addEventListener('pointerdown', e=>{
+        if (!e.isPrimary) return;
+        this.prevPos = [e.offsetX, e.offsetY];
+    });
+    canvas.addEventListener('pointermove', e=>{
+        if (!e.isPrimary || e.buttons != 1) return;
+        const [px, py] = this.prevPos;
+        const [x, y] = [e.offsetX, e.offsetY];
+        this.prevPos = [x, y];
+
+        let [yaw, pitch, dist] = this.viewParams.cameraXYD;
+        yaw -= (x-px)*0.01;
+        pitch -= (y-py)*0.01;
+        pitch = Math.min(Math.max(pitch, 0), Math.PI);
+        this.viewParams.cameraXYD.set([yaw, pitch, dist]);
+    });
+
+    canvas.addEventListener('wheel', e=>{
+        let [yaw, pitch, dist] = this.viewParams.cameraXYD;
+        dist -= e.deltaY*0.001;
+        console.log(dist);
+        dist = Math.min(Math.max(dist, 0.01), 20);
+        this.viewParams.cameraXYD.set([yaw, pitch, dist]);
+    });
+
+    render(0.0);
+
+
+</script>
