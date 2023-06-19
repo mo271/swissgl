@@ -62,14 +62,14 @@ class DotCamera {
                 `}, {scale:1/8, story:2, format:'rgba32f', tag:`points_${color}`});
 
                 this.field[color] = glsl({...arg, points:points[0], Grid: points[0].size, Blend:'s+d', Clear:0, VP:`
-                VOut.xy = (points(ID.xy).xy + XY*15.0/canvasSize)*2.0-1.0;
+                VPos.xy = (points(ID.xy).xy + XY*15.0/canvasSize)*2.0-1.0;
                 `, FP:`vec3(XY,1.)*exp(-dot(XY,XY)*vec3(4,4,8)),0`}, {scale:1/4, format:'rgba16f', tag:`field_${color}`})
             }
 
             const rgb = ['0.0', '0.0', '0.0'];
             rgb[idx] = '1.0';
             glsl({...arg, points:points[0], Grid: points[0].size, Blend:'s+d', VP:`
-                VOut.xy = (points(ID.xy).xy + XY*4.0/canvasSize)*2.0-1.0;
+                VPos.xy = (points(ID.xy).xy + XY*4.0/canvasSize)*2.0-1.0;
             `, FP:`vec4(${rgb.join(', ')}, 1.0) * exp(-dot(XY,XY)*3.0)`})
         });
     }
